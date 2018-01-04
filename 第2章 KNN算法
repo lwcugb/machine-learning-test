@@ -5,3 +5,21 @@ def CreateDataSet():
 	group  = array([[1.0,1.1],[1.0,1.0],[0,0],[0,0.1]])
 	labels = ['A','A','B','B']
 	return group, labels
+
+def classify0(inX, dataSet, labels, k):
+	dataSetSize = dataSet.shape[0] #dataSet是一个数组，shape[0]表示获得数组的行数，shape[1]表示获得列数
+	diffMat =  tile(inX,(dataSetSize,1)) - dataSet  #dataSetSize是一个数字，tile()表示用inX构造一个dataSetSize行，1列的数组
+	sqDiffMat = diffMat **2
+	sqDistances = sqDiffMat.sum(axis=1)   #axis=1表示数组按列求和
+	distances = sqDistances ** 0.5
+	sortedDistances = distances.argsort()  #注意这里的argsort表示得到是分类之后的下标，而不是元素本身
+	classCount={}
+	for i in range(k):
+		voteIlabel = labels[sortedDistances[i]]   #得到下标对应的labels类
+		classCount[voteIlabel] = classCount.get(voteIlabel,0) + 1   #字典的get函数表示得到对应键的值，后面的0，表示没有,该键之后的返回值是0
+	sortedClassCount=sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse=True) 	                         
+	return sortedClassCount[0][0]  #得到的对象是一个以元组为元素的list,类似于[('A',2),('B'1)]
+	
+	 #sorted 函数的使用，第一个参数表示一个要排序的对象(这个对象一定要是可迭代的，否则会出错)，这里的字典的iteritems方法得到的是字典元素的迭代对象
+	 #第二个参数key表示要根据那个量进行大小的比较，operator.itemgetter(1)函数表示根据对象的第二个阈值进行比较，reverse=True表示按照从大到小的顺序进行比较，默认是按照从小到大的顺序来排序的
+	
