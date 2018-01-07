@@ -53,7 +53,19 @@ def autonorm(dataSet):
 	return normDataSet, ragnes, minVals
 
 #------------------------------------------------3测试算法---------------------------------------------------------------
-
+def datingClassTest():
+	hoRatio=0.1 #设定测试的样本比例，不同的占比可能得到的错误率都会有所差别
+	datingDataMat, datingLabels = file2matrix('datingDataTest2')  #从文本中提取得到数据特征，及对应的标签
+	normMat,ranges,minVals = aotuNorm(datingDataMat) #对数据特征进行归一化
+	m = normMat.shape[0] #得到行数
+	numTestVecs = int(m*hoRatio) #测试样本数量
+	errorCount = 0.0 #错误数据初始化
+	for i in range(numTestVecs):
+		classifierResult = classify0(normMat[i,:],normMat[numTestVecs:m,:],datingLabels[numTestVecs:m],3) #利用分类函数classify0获取测试样本数据分类结果
+		print("the classifier came back with: %d, the real answer is: %d" %(classifierResult,datingLabels[i])) #打印预测结果和实际标签
+		if(classifierResult != datingLabels[i]):errorCount+=1.0 #如果预测输出不等于实际标签,错误数增加1.0
+	print("the total error rate is: %f" %(errorCount/float(numTestVecs))) #打印最后的误差率
+	
 
 
 
