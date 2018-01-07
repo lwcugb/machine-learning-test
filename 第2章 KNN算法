@@ -66,6 +66,82 @@ def datingClassTest():
 		if(classifierResult != datingLabels[i]):errorCount+=1.0 #如果预测输出不等于实际标签,错误数增加1.0
 	print("the total error rate is: %f" %(errorCount/float(numTestVecs))) #打印最后的误差率
 	
+#------------------------------------------4运用已经完成的算法进行实际分类---------------------------------------------------
+def classifyPerson():
+	resultList = ['not at all','in small doses','in large doses']  #结果列表，对应的是datingTestSet2里面最后一列的1,2,3
+	percentTats = float(raw_input("percentage of time spent playing video games?")) #在python3.x中，已经删除raw_input()，取而代之的是input(),另外输入的是文本类型的数据，要用float去转换
+	ffMiles = float(raw_put("frequent filer miles earned per year?"))
+	iceCream=float(input("liters of ice cream consumed per year?"))
+	datingDataMat,datingLabels=file2matrix('datingTestSet2.txt')   #获得数据
+	normMat,ranges,minValues=autoNorm(datingDataMat)  #归一化数据
+	inArr=array([ffMiles,percentTats,iceCream])  #将输入的数据变成数组形式
+	classifierResult = classify0((inArray-minVals)/ranges,norMat,datingLabels,3)
+	print("You will probably like this person:", resultList[classifierResult-1]) #因为这里的labels是数字1,2,3，所以变成list的下标要减一
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 
