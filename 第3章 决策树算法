@@ -13,7 +13,7 @@
 （6）使用算法：此步骤可以适用于任何监督学习算法，而使用决策树可以更好地理解数据的内在含义。
 
 '''
-
+#以下代码命名为tree.py
 #--------------------------------------------------------计算数据集的熵--------------------------------------------------------------
 from math import log
 
@@ -30,5 +30,21 @@ def calcShannonEnt(dataSet):
         prob = (labelCounts[key])/numEntries   #对于数据集中所有的分类类别，计算各个类别出现的频率
         ShanninEnt -=prob*log(prob,2)      #计算各个类别信息期望值 log(prob,2)表示以2为底的prob的对数
     return ShannonEnt
+#可以自己创建一个简单的数据集来验证熵的计算是否正确，数据集中包含两个特征'no surfacing','flippers';数据的类标签有两个'yes','no'
+def createDataSet():
+    dataSet=[[1,1,'yes'],
+            [1,1,'yes'],
+            [1,0,'no'],
+            [0,1,'no'],
+            [0,1,'no']]
+    labels=['no surfacing','flippers']
+    return dataSet,labels  #返回数据集和类标签
+#可以在Python命令提示符下输入以下命令，来检测输出的熵的值是否正确，另外需要说明的是，熵越高，那么混合的数据就越多，如果我们在数据集中添加更多的分类，会导致熵结果增大
+#>>>import tree.py
+#>>>myDat,label=tree.createDataSet()
+#>>>tree.calcShannonEnt(myDat)
+
+
+
 
 
