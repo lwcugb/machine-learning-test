@@ -7,7 +7,9 @@ def CreateDataSet():
 	return group, labels
 
 
-
+#--------------------------------------KNN算法实例------------------------------------------------------------------
+#--------------------------------------约会网站配对------------------------------------------------------------------
+#-------------------------1将text文本数据转化为分类器可以接受的格式-----------------------------------------------------
 def file2matrix(filename):
     #打开文件
     fr=open(filename)
@@ -35,3 +37,29 @@ def file2matrix(filename):
         classLabelVector.append(int(listFromLine[-1]))
         index+=1
     return returnMat,classLabelVector
+
+#----------------------------------------------2准备数据：归一化--------------------------------------------------
+#计算欧式距离时，如果某一特征数值相对于其他特征数值较大，那么该特征对于结果影响要
+#远大于其他特征，然后假设特征都是同等重要，即等权重的，那么可能某一特征对于结果存在严重影响
+
+def autonorm(dataSet):
+	minVals = dataSet.min(0)  #参数0按列选取最小值，如果换成1表示按行选取最小值
+	maxVals = dataSet.max(0)  #参数0按列选取最大值，如果换成1表示按行选取最大值
+	ranges  = maxVals-minVals
+	normDataSet = zeros(shape(dataSet)) #创建与dataSet等大小的归一化矩阵，shape()获取dataSet的矩阵大小，即行数和列数
+	m = dataSet.shape[0]  #获得dataSet的行数， shape[1]表示获取列数
+	normDataSet = dataSet - tile(minVals,(m,1))  #将dataSet的每一行的对应列减去minVals中对应列的最小值
+	normDataSet = normDataSet/tile(ranges,(m,1)) #归一化，公式newValue=(value-minvalue)/(maxVal-minVal)，还要注意这里的 '/'表示每一个矩阵内的数分别相除，而不是矩阵相除
+	return normDataSet, ragnes, minVals
+
+
+
+
+
+
+
+
+
+
+
+
