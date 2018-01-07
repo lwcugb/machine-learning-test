@@ -52,6 +52,7 @@ def autonorm(dataSet):
 	normDataSet = normDataSet/tile(ranges,(m,1)) #归一化，公式newValue=(value-minvalue)/(maxVal-minVal)，还要注意这里的 '/'表示每一个矩阵内的数分别相除，而不是矩阵相除
 	return normDataSet, ragnes, minVals
 
+#------------------------------------------------3测试算法---------------------------------------------------------------
 
 
 
