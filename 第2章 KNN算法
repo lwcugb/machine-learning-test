@@ -94,7 +94,7 @@ def img2vector(filename):
         	returnVec[0,32*i+j]=int(lineStr[j]) #通俗讲：就是根据首地址(位置)的偏移量计算出当前数据存放的地址(位置)
     return returnVec
 	
-#-------------------------2 测试代码--------------------------------------
+#--------------------------------------------------------------2 测试代码------------------------------------------------------------
 def handWritingClassTest():
 	hwLabels = []  #建立存储类型labels的列表
 	trainingFileList = listdir('knn/trainingDigits') #列出给定目录的文件名列表，返回格式是list，使用前需导入from os import listdir
