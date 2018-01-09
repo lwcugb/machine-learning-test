@@ -88,7 +88,60 @@ def chooseBestFeatureToSplit(dataSet):
         
     return bestFeature            #返回最优特征
 			
-			
+#-------------------------------------------------采用多数表决的方法完成分类--------------------------------------------------------
+#当遍历完所有的特征属性后，类标签仍然不唯一(分支下仍有不同分类的实例)的时候需要用到以下代码，选取多数分类标签为该类标签
+def majorityCnt(classList):
+    classCount={}  #创建一个类标签的字典
+    #遍历类标签列表中每一个元素
+    for vote in classList:
+    	if vote not in classCount.keys():   #如果元素不在字典中
+        	classCount[vote]=0   #在字典中添加新的键值对
+        
+        classCount[vote]+=1      #否则，当前键对于的值加1
+    #对字典中的键对应的值所在的列，按照又大到小进行排序(改方法在KNN算法里面也用到过)
+    #@classCount.iteritems 得到列表对象
+    #@key=operator.itemgetter(1) 获取列表对象的第二个域的值
+    #@reverse=true 降序排序，默认是升序排序
+    sortedClassCount=sorted(classCount.iteritems, key=operator.itemgetter(1),reverse=true)
+    #返回出现次数最多的类标签
+    return sortedClassCount[0][0]
+
+#-----------------------------------------------通过递归的方式构建决策树的代码-------------------------------------------------------
+def createTree(dataSet,labels):                        #这里的参数labels指的是各种特征的名称，比如书上的'no surfacing'和'flipper'
+    classList=[example[-1] for example in dataSet]     #获取数据集中的最后一列的类标签，存入classList列表
+    
+    #通过count()函数获取类标签列表中第一个类标签的数目                                                
+    if classList.count(classList[0])==len(classList):  #判断数目是否等于列表长度，相同表明所有类标签相同，属于同一类
+        return classList[0]
+    #遍历完所有的特征属性，此时数据集的列为1，即只有类标签列
+    if len(dataSet[0])==1:
+        #多数表决原则，确定类标签
+        return majorityCnt(classList)
+   
+    bestFeat=chooseBestFeatureToSplit(dataSet)       #确定出当前最优的分类特征，返回列的下标
+    bestFeatLabel=labels[bestFeat]                   #在特征标签列表中获取该特征对应的值，得到特征的名称
+    myTree={bestFeatLabel:{}}                        #采用字典嵌套字典的方式，存储分类树信息。该类嵌套对于初学者可能不太熟悉。
+                                                     #可以举一个简单的例子如 a={'小红':{'身高':170,'体重':60},'小明':{'身高':175,'体重':70}}
+    ##此位置书上写的有误，书上为del(labels[bestFeat])    #这样我们取值或者赋值的时候就可以用 a[0][0]来获得小红的身高值
+    ##相当于操作原始列表内容，导致原始列表内容发生改变
+    ##按此运行程序，报错'no surfacing'is not in list
+    ##以下代码已改正
+   
+    subLabels=labels[:]                                    #复制当前特征标签列表，防止改变原始列表的内容
+    del(subLabels[bestFeat])                               #删除属性列表中当前分类数据集特征
+    featValues=[example[bestFeat] for example in dataSet]  #获取数据集中最优特征所在列
+    uniqueVals=set(featValues)                             #采用set集合性质，获取特征的所有的唯一取值
+	
+    #遍历每一个特征取值
+    for value in uniqueVals:
+        #采用递归的方法利用该特征对数据集进行分类
+        #@bestFeatLabel 分类特征的特征标签值
+        #@dataSet 要分类的数据集
+        #@bestFeat 分类特征的标称值,即特征列的下标
+        #@value 标称型特征的取值(即把文本转化成数字表示，如书中用'0'代替'否'，用'1'代替'是')
+        #@subLabels 去除分类特征后的子特征标签列表
+        myTree[bestFeatLabel][value]=createTree(splitDataSet(dataSet,bestFeat,value),subLabels)
+    return myTree
 			
 			
 			
