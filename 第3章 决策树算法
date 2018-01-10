@@ -149,9 +149,9 @@ def createTree(dataSet,labels):                        #这里的参数labels指
 import matplotlib.pyplot as plt
 
 #这里是对绘制是图形属性的一些定义，可以不用管，主要是后面的算法
-decisionNode = dict(boxstyle="sawtooth", fc="0.8")
-leafNode = dict(boxstyle="round4", fc="0.8")
-arrow_args = dict(arrowstyle="<-")
+decisionNode = dict(boxstyle="sawtooth", fc="0.8")  #定义了判断节点的图框格式锯齿状，fc=0.8表示框内颜色的深浅
+leafNode = dict(boxstyle="round4", fc="0.8")        #定义了叶子节点的图框格式圆状，fc=0.8表示框内颜色的深浅
+arrow_args = dict(arrowstyle="<-")                  #定义了箭头的形式
 
 #这是递归计算树的叶子节点个数，比较简单
 def getNumLeafs(myTree):
