@@ -146,6 +146,8 @@ def createTree(dataSet,labels):                        #这里的参数labels指
 		
 		
 #-----------------------------------------------------利用matplotlib绘制决策树----------------------------------------------------
+#以下代码保存文件名为treePlotter.py的文件
+
 import matplotlib.pyplot as plt
 
 #这里是对绘制是图形属性的一些定义，可以不用管，主要是后面的算法
@@ -222,6 +224,42 @@ def createPlot(inTree):
     plotTree.xOff = -0.5/plotTree.totalW; plotTree.yOff = 1.0;
     plotTree(inTree, (0.5,1.0), '')
     plt.show()
+#这个是用来创建数据集即决策树
+def retrieveTree(i):
+    listOfTrees =[{'no surfacing': {0:{'flippers': {0: 'no', 1: 'yes'}}, 1: {'flippers': {0: 'no', 1: 'yes'}}, 2:{'flippers': {0: 'no', 1: 'yes'}}}},
+                  {'no surfacing': {0: 'no', 1: {'flippers': {0: {'head': {0: 'no', 1: 'yes'}}, 1: 'no'}}}}
+                  ]
+    return listOfTrees[i]
+	
+	
+#---------------------------------------------------------测试算法----------------------------------------------------------------
+#以下代码保存在tree.py中
+#完成决策树的构造后，采用决策树实现具体应用
+#@intputTree 构建好的决策树,即上面的myTree函数
+#@featLabels 特征标签列表,即['no surfacing','flipper']
+#@testVec 测试实例，即是一个各个特征值的列表，如书中[1,0],'1'代表no surfacing 的值，'0'代表flipper的值
+def classify(inputTree,featLabels,testVec):
+
+    firstStr=list(inputTree.keys())[0]     #找到树的第一个分类特征，即每次递归的根节点，如 no surfacing和flipper。注意python2.x和3.x区别，2.x可写成firstStr=inputTree.keys()[0]，而不支持3.x
+    secondDict=inputTree[firstStr]         #从树中得到该分类特征的所有分支组成的字典，有0和1
+    featIndex=featLabels.index(firstStr)   #根据分类特征的列表的index方法找到对应的标称型数据值，'no surfacing'对应的索引为0
+   
+    for key in secondDict.keys():          #遍历分类特征所有的取值，no surfacing 有0和1两个键
+        if testVec[featIndex]==key:        #如果测试实例的该特征的取值等于该key所代表的取值就进入下一步判断，否则就进入下一个key的循环
+            
+            if type(secondDict[key]).__name__=='dict':                    #type()函数判断该子节点是否为字典类型
+                classLabel=classify(secondDict[key],featLabels,testVec)   #子节点为字典类型，则表明是另一个根节点代表的特征的开始，从该分支树开始继续遍历分类
+            else: classLabel=secondDict[key]                              #如果是叶子节点，则返回节点取值
+    return classLabel
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 
