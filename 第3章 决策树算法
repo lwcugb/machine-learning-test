@@ -188,9 +188,10 @@ def plotMidText(cntrPt, parentPt, txtString):
 #重点，递归，决定整个树图的绘制，难（自己认为）
 def plotTree(myTree, parentPt, nodeTxt):  
     numLeafs = getNumLeafs(myTree)  #得到叶子节点的总数，由于横纵坐标的范围都是从0到1，所以1/numleafs就得到每两个节点的距离
-    depth = getTreeDepth(myTree)    #达到深度，方法同叶子节点数目
+    depth = getTreeDepth(myTree)    #得到总深度，方法同叶子节点数目
     firstStr = myTree.keys()[0]     
     cntrPt = (plotTree.xOff + (1.0 + float(numLeafs))/2.0/plotTree.totalW, plotTree.yOff)
+    #cntrPt这个变量记录了递归过程中每一个根节点的横坐标
     #上面的代码需要分开来理解，即plotTree.xOff +  float(numLeafs)/2.0/plotTree.totalW +1.0/2.0/plotTree.totalW
     #我们知道numLeaf记录了每次递归调用时当前树的叶子节点个数，float(numLeafs)/2.0/plotTree.totalW表示得到这些叶子节点的中间点到这些叶子节点两边的距离
     #而后面的1.0/2.0/plotTree.totalW表示整个x轴的中间点距离原点的距离，而plotTree.xOff记录了每一次根节点的位置，它的初始值为-0.5/plotTree.totalW ，是往左偏了0.5/plotTree.tatalW 的，这里正好加回去
@@ -207,8 +208,8 @@ def plotTree(myTree, parentPt, nodeTxt):
             plotTree.xOff = plotTree.xOff + 1.0/plotTree.totalW     #每画一个叶子节点就要向右移动一个1/plotTree.totalW的长度
             plotNode(secondDict[key], (plotTree.xOff, plotTree.yOff), cntrPt, leafNode)   #画出叶子节点
             plotMidText((plotTree.xOff, plotTree.yOff), cntrPt, str(key))
-    plotTree.yOff = plotTree.yOff + 1.0/plotTree.totalD    
-
+    plotTree.yOff = plotTree.yOff + 1.0/plotTree.totalD    #该语句第一次执行使是已经第一次到达了树的底部，即到达了底部最最左端第一组的叶子节点
+    #这里的plotTree.yOff加上一个距离之后，就返回到上一层的根节点处，继续循环向右画出其余根节点和叶子节点。程序是从下向上，从左向右，一层一层依次执行的。
 
 #这个是真正的绘制，上边是逻辑的绘制
 def createPlot(inTree):
@@ -223,24 +224,6 @@ def createPlot(inTree):
     plt.show()
 	
 	
-cntrPt用来记录当前要画的树的树根的结点位置
-
-在plotTree函数中，它是这样计算的
-
-cntrPt = (plotTree.xOff + (1.0 + float(numLeafs))/2.0/plotTree.totalW, plotTree.yOff)
-
-numLeafs记录当前的树中叶子结点个数。我们希望树根在这些所有叶子节点的中间。
-
-plotTree.xOff + (1.0 + float(numLeafs))/2.0/plotTree.totalW
-
-这里的 1.0 + numLeafs 需要拆开来理解，也就是
-
-plotTree.xOff +  float(numLeafs)/2.0/plotTree.totalW +1.0/2.0/plotTree.totalW
-
-plotTree.xOff +  1/2 * float(numLeafs)/plotTree.totalW + 0.5/plotTree.totalW
-
-因为xOff的初始值是-0.5/plotTree.totalW ，是往左偏了0.5/plotTree.tatalW 的，这里正好加回去。这样cntrPt记录的x坐标正好是所有叶子结点的中心点
-			
 
 
 
