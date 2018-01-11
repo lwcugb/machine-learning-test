@@ -193,20 +193,22 @@ def plotTree(myTree, parentPt, nodeTxt):
     cntrPt = (plotTree.xOff + (1.0 + float(numLeafs))/2.0/plotTree.totalW, plotTree.yOff)
     #上面的代码需要分开来理解，即plotTree.xOff +  float(numLeafs)/2.0/plotTree.totalW +1.0/2.0/plotTree.totalW
     #我们知道numLeaf记录了每次递归调用时当前树的叶子节点个数，float(numLeafs)/2.0/plotTree.totalW表示得到这些叶子节点的中间点到这些叶子节点两边的距离
-    #而后面的1.0/2.0/plotTree.totalW表示整个x轴的中间点距离原点的距离
-    plotMidText(cntrPt, parentPt, nodeTxt)
-    plotNode(firstStr, cntrPt, parentPt, decisionNode)
+    #而后面的1.0/2.0/plotTree.totalW表示整个x轴的中间点距离原点的距离，而plotTree.xOff记录了每一次根节点的位置，它的初始值为-0.5/plotTree.totalW ，是往左偏了0.5/plotTree.tatalW 的，这里正好加回去
+    #初始第一次执行时float(numLeafs)和plotTree.totalW是相等的，所以第一次的centerPt和parentPt是相等的，都为(0.5,1),后面递归就作为parentPt了
+    
+    plotMidText(cntrPt, parentPt, nodeTxt)  
+    plotNode(firstStr, cntrPt, parentPt, decisionNode)   #上面到这里的代码都是画的根节点，即特征的名称
     secondDict = myTree[firstStr]
-    plotTree.yOff = plotTree.yOff - 1.0/plotTree.totalD
+    plotTree.yOff = plotTree.yOff - 1.0/plotTree.totalD  #画完根节点之后纵坐标深度下移一层
     for key in secondDict.keys():
         if type(secondDict[key]).__name__=='dict':#test to see if the nodes are dictonaires, if not they are leaf nodes   
-            plotTree(secondDict[key],cntrPt,str(key))        #recursion
-        else:   #it's a leaf node print the leaf node
-            plotTree.xOff = plotTree.xOff + 1.0/plotTree.totalW
-            plotNode(secondDict[key], (plotTree.xOff, plotTree.yOff), cntrPt, leafNode)
+            plotTree(secondDict[key],cntrPt,str(key))        #如果是字典就递归，上一次的centrPt作为下一个的parentPt使用
+        else:   #如果是叶子节点就画出来
+            plotTree.xOff = plotTree.xOff + 1.0/plotTree.totalW     #每画一个叶子节点就要向右移动一个1/plotTree.totalW的长度
+            plotNode(secondDict[key], (plotTree.xOff, plotTree.yOff), cntrPt, leafNode)   #画出叶子节点
             plotMidText((plotTree.xOff, plotTree.yOff), cntrPt, str(key))
-    plotTree.yOff = plotTree.yOff + 1.0/plotTree.totalD
-#if you do get a dictonary you know it's a tree, and the first element will be another dict
+    plotTree.yOff = plotTree.yOff + 1.0/plotTree.totalD    
+
 
 #这个是真正的绘制，上边是逻辑的绘制
 def createPlot(inTree):
