@@ -63,7 +63,7 @@ def splitDataSet(dataSet,axis,value):    #@dataSet:待划分的数据集 @axis:�
 #使用某一特征划分数据集，信息增益最大，则选择该特征作为最优特征
 def chooseBestFeatureToSplit(dataSet):
     numFeatures=len(dataSet[0])-1   #获取数据集特征的数目(不包含最后一列的类标签),dataSet[0]表示选取第一行
-    baseEntropy=calEnt(dataSet)     #计算未进行划分的信息熵
+    baseEntropy=calShannonEnt(dataSet)     #计算未进行划分的信息熵
     #最优信息增益    最优特征
     bestInfoGain=0.0;bestFeature=-1
     
@@ -78,7 +78,7 @@ def chooseBestFeatureToSplit(dataSet):
         for value in uniqueVals:                      #对特征的每一个取值，分别构建相应的分支
             subDataSet=splitDataSet(dataSet,i,value)  #根据特征i的取值将数据集进行划分为不同的子集,利用splitDataSet()获取特征取值Value分支包含的数据集
             prob=len(subDataSet)/float(len(dataSet))  #计算特征取值value对应子集占数据集的比例
-            newEntropy+=prob*calEnt(subDataSet)       #计算占比*当前子集的信息熵,并进行累加得到总的信息熵
+            newEntropy+=prob*calShannonEnt(subDataSet)       #计算占比*当前子集的信息熵,并进行累加得到总的信息熵
 			
         #计算按此特征划分数据集的信息增益
         #公式特征A,数据集D
