@@ -14,6 +14,8 @@
 
 #以下代码的文件命名为tree.py
 #--------------------------------------------------------计算数据集的熵--------------------------------------------------------------
+# 如果待分类的事物可能会出现多个结果x，则第i个结果xi发生的概率为p(xi),那么我们可以由此计算出xi的信息熵为l(xi)=p(xi)log(1/p(xi))=-p(xi)log(p(xi))
+#那么，对于所有可能出现的结果，事物所包含的信息希望值（信息熵）就为：H=-Σp(xi)log(p(xi))，i属于所有可能的结果
 from math import log
 
 def calcShannonEnt(dataSet):
@@ -44,6 +46,8 @@ def createDataSet():
 #>>>tree.calcShannonEnt(myDat)
 
 #-----------------------------------------------按照某一个特征划分数据集------------------------------------------------------------
+#分类的标准是按照该特征分类可以获得最大的信息增益
+#信息增益的公式为：信息增益H(D,A)=原始数据集的信息熵H(D)-特征A对数据集进行划分后信息熵H(D/A)
 def splitDataSet(dataSet,axis,value):    #@dataSet:待划分的数据集 @axis:划分数据集的特征(注意这里输入的列的下标，而不是列) @value:特征的取值
 	retDataSet = []   #需要说明的是,python语言传递参数列表时，传递的是列表的引用，如果在函数内部对列表对象进行修改，将会导致列表发生变化，为了不修改原始数据集，创建一个新的列表对象进行操作
 	for featVec in dataSet:   #提取数据集的每一行的特征向量
@@ -71,7 +75,7 @@ def chooseBestFeatureToSplit(dataSet):
         #信息增益0.0
         newEntropy=0.0
        
-        for value in uniqueVals:   #对特征的每一个取值，分别构建相应的分支
+        for value in uniqueVals:                      #对特征的每一个取值，分别构建相应的分支
             subDataSet=splitDataSet(dataSet,i,value)  #根据特征i的取值将数据集进行划分为不同的子集,利用splitDataSet()获取特征取值Value分支包含的数据集
             prob=len(subDataSet)/float(len(dataSet))  #计算特征取值value对应子集占数据集的比例
             newEntropy+=prob*calEnt(subDataSet)       #计算占比*当前子集的信息熵,并进行累加得到总的信息熵
@@ -253,12 +257,52 @@ def classify(inputTree,featLabels,testVec):
     return classLabel
 	
 	
-	
-	
-	
-	
-	
-	
+#---------------------------------------------------------存储算法于内存中---------------------------------------------------------
+#我们知道构建决策树是非常耗时的任务，即使很小的数据集，也要花费几秒的时间来构建决策树，这样显然耗费计算时间。所以，我们可以将构建好的决策树保存在磁盘中，这样当我们需要的时候，再从磁盘中读取出来使用即可。	
+#决策树的存储：python的pickle模块序列化决策树对象，使决策树保存在磁盘中
+#在需要时读取即可，数据集很大时，可以节省构造树的时间
+#pickle模块存储决策树
+def storeTree(inputTree,filename):
+    #导入pickle模块
+    import pickle
+    #创建一个可以'写'的文本文件
+    #这里，如果按树中写的'w',将会报错write() argument must be str,not bytes
+    #所以这里改为二进制写入'wb'
+    fw=open(filename,'wb')
+    #pickle的dump函数将决策树写入文件中
+    pickle.dump(inputTree,fw)
+    #写完成后关闭文件
+    fw.close()
+#取决策树操作    
+def grabTree(filename):
+    import pickle
+    #对应于二进制方式写入数据，'rb'采用二进制形式读出数据
+    fr=open(filename,'rb')
+    return pickle.load(fr)
+
+#-----------------------------------------------------示例：使用决策树预测隐形眼镜类型------------------------------------------------------
+#步骤如下：
+#（1）收集数据：文本数据集'lenses.txt'
+#（2）准备数据：解析tab键分隔开的数据行
+#（3）分析数据：快速检查数据，确保正确地解析数据内容
+#（4）训练算法：构建决策树
+#（5）测试算法：通过构建的决策树比较准确预测出分类结果
+#（6）算法的分类准确类满足要求，将决策树存储下来，下次需要时读取使用
+
+def predictLensesType(filename):
+    #打开文本数据
+    fr=open(filename)
+    #将文本数据的每一个数据行按照tab键分割，并依次存入lenses
+    lenses=[inst.strip().split('\t') for inst in fr.readlines()]
+    #创建并存入特征标签列表
+    lensesLabels=['age','prescript','astigmatic','tearRate']
+    #根据继续文件得到的数据集和特征标签列表创建决策树
+    lensesTree=createTree(lenses,lensesLabels)
+    return lensesTree	
+
+#决策树算法可能或出现的过度匹配（过拟合）的问题，当决策树的复杂度较大时，很可能会造成过拟合问题。
+#此时，我们可以通过裁剪决策树的办法，降低决策树的复杂度，提高决策树的泛化能力。比如，如果决策树的某一叶子结点只能增加很少的信息，那么我们就可将该节点删掉，将其并入到相邻的结点中去，这样，降低了决策树的复杂度，消除过拟合问题。
+#本章使用的算法称ID3,它是一个很好 的算法但并不完美。ID3算法无法直接处理数值型数据 尽管我们可以通过量化的方法将数值型数据转化为标称型数值，但是如果存在太多的特征划分，ID3算法仍会面临其他问题。	
 	
 	
 	
