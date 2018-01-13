@@ -125,8 +125,19 @@ def testingNB():
     testEntry1=['stupid','garbage']     #第二个测试文档
     thisDoc1=array(setOfWords2Vec(myVocabList,testEntry1)) #将测试文档转为词条向量，并转为NumPy数组的形式
     print(testEntry1,'classified as:',classifyNB(thisDoc1,p0V,p1V,pAb))
-    
-    
+
+'''
+这里需要补充一点，上面也提到了关于如何选取文档特征的方法，上面用到的是词集模型，即对于一篇文档，将文档中是否出现某一词条作为特征，即特征只能为0不出现或者1出现；
+然后，一篇文档中词条的出现次数也可能具有重要的信息，于是我们可以采用词袋模型，在词袋向量中每个词可以出现多次，这样，在将文档转为向量时，每当遇到一个单词时，它会增加词向量中的对应值
+'''
+#具体将文档转为词袋向量的代码为:
+
+def bagOfWords2VecMN(vocabList,inputSet):
+    returnVec=[0]*len(vocabList)  #词袋向量
+    for word in inputSet:
+        if word in vocabList:
+            returnVec[vocabList.index(word)]+=1  #某词每出现一次，次数加1
+     return returnVec
     
     
     
