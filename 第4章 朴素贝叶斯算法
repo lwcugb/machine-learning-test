@@ -181,15 +181,98 @@ def spamTest():
             errorCount+=1
         print('the error rate is:',float(errorCount)/len(testSet))
         
+        
+#代码中，采用随机选择的方法从数据集中选择训练集，剩余的作为测试集。这种方法的好处是，可以进行多次随机选择，得到不同的训练集和测试集。
+#从而得到多次不同的错误率，我们可以通过多次的迭代，求取平均错误率，这样就能得到更准确的错误率。这种方法称为留存交叉验证。
 
+#-------------------------------------------------实例2从个人广告中获取区域倾向------------------------------------------------------
+#在本例中，我们通过从不同的城市的RSS源中获得的同类型广告信息，比较两个城市人们在广告用词上是否不同。如果不同，那么各自的常用词是哪些？
+#而从人们的用词当中，我们能否对不同城市的人所关心的内容有所了解？如果能得到这些信息，分析过后，相信对于广告商而言具有不小的帮助。
+
+#利用RSS源得到文本数据，Universal Feed Parser是Python中最常见的RSS程序库。通过如下语句可以获得相应的文本数据.
+import feedparser #需要预先下载这个包，就像安装其他的包一样在命令行中输入 pip install feedparser
+ny=feedparser.parse('http://newyork.craigslist.org/stp/index.rss')
+ny['entries']
+len(ny['entries'])
+
+#RSS源分类器及高频词去除函数
+def calMostFreq(vocabList,fullTest):
+    import operator#导入操作符
+    freqDict={}#创建新的字典用于存储高频词（键）和出现的次数（值）
+    for token in vocabList:
+        freqDict[token]=fullTest.count(token) #将单词/单词出现的次数作为键值对存入字典，注意学习fullTest.count(token) 来获得列表中元素出现次数的方法
+        sortedFreq=sorted(freqDict.iteritems(),keys=operator.itemgetter(1),reverse=true)#按照键值value(词条出现的次数)对字典进行排序，由大到小
+        return sortedFreq[:30]#返回出现次数最多的前30个单词
+        
+def localWords(feed1,feed0):
+    import feedparser
+    docList=[];classList=[];fullTest=[]#新建三个列表
+    minLen=min(len(feed1['entries']),len(feed0['entries']))#获取条目较少的RSS源的条目数
+    for i in range(minLen):
+        wordList=textParse(feed1['entries'][i]['summary'])#在这里要清楚feed1['entries']的结构，它是由许多字典元素组成的列表。这里是获得条目中的summary键下的文本
+        docList.append(wordList)
+        fullTest.extend(wordList)
+        classList.append(1)
+        wordList=testParse(feed0['entries'][i]['summary'])
+        docList.append(wordList)
+        fullTest.extend(wordList)
+        classList.append(0)
+    vocabList=createVocabList(docList)#构建出现的所有词条列表
+    top30Words=calMostFreq(vocabList,fullTest)#找到出现的单词中频率最高的30个单词
+    
+    for pairW in top30Words:#遍历每一个高频词，并将其在词条列表中移除。这里移除高频词后错误率下降，如果继续移除结构上的辅助词，错误率很可能会继续下降
+        if pairW[0] in vocabList: #注意top30Words的结构是由键值对构成相应的列表，然后由这些列表再构成一个总列表
+            vocabList.remove(pairW[0])
+    #下面内容与函数spamTest完全相同，就是改变了测试的数目和最后返回后面要用到的值
+    trainingSet=[x for x in range(2*minLen)];testSet=[]#构建一个大小为50的整数列表和一个空列表
+    for i in range(20):#随机选取0~19中的20个数，作为索引，构建测试集
+        randIndex=int(random.uniform(0,len(trainingSet)))#随机选取0~19中的一个整型数
+        testSet.append(trainingSet[randIndex])#将选出的数的列表索引值添加到testSet列表中
+        del(trainingSet[randIndex])#从整数列表中删除选出的数，防止下次再次选出。同时将剩下的作为训练集
+    
+    trainMat=[];trainClasses=[]#新建两个列表，分别存放训练矩阵和类标签向量
+    for docIndex in trainingSet:#遍历训练集中的每个字符串列表
+        trainMat.append(setOfWords2Vec(vocabList,docList[docIndex]))#将字符串列表转为词条向量，然后添加到训练矩阵中。书中有错误，应该把fullTest换成docList
+        trainClasses.append(classList[docIndex])#将该邮件的类标签存入训练类标签列表中
+    
+    p0V,p1V,pSpam=trainNB0(array(trainMat),array(trainClasses))#计算贝叶斯函数需要的概率值并返回
+    errorCount=0
+    for docIndex in testSet:#遍历测试集中的字符串列表
+        wordVector=setOfWords2Vec(vocabList,docList[docIndex])#同样将测试集中的字符串列表转为词条向量
+        if classifyNB(array(wordVector),p0V,p1V,pSpam)!=classList[docIndex]：#对测试集中字符串向量进行预测分类，分类结果不等于实际结果
+            errorCount+=1
+        print('the error rate is:',float(errorCount)/len(testSet))
+        return vocabList,p0V,p1V
+        
+#需要说明的是，这里用到了将出现次数最多的30个单词删除的方法，结果发现去掉了这些最常出现的高频词后，错误率大幅度上升，这表明了文本中的小部分高频单词占据了文本中绝大部分的用词。
+#产生这种情况的原因是因为语言中大部分是冗余和结果辅助性内容。所以，我们不仅可以尝试移除高频词的方法，还可以进一步从某个预定词表(停用词表)中移除结构上的辅助词，通过移除辅助性词，分类错误率会所有下降。
+#此外，为了得到错误率的精确估计，应进行多次上述实验，从而得到错误率平均值。     
+
+
+#对得到的数据进行分析
+#最具表征性的词汇显示函数
+def getTopWords(ny,sf):
+    import operator
+    vocabList,p0V,p1V=localWords(ny,sf)#利用RSS源分类器获取所有出现的词条列表，以及每个分类中每个单词出现的概率
+    topNY=[];topSF=[]#创建两个元组列表(即列表内的元素是元组组成的)
+    for i in range(len(p0V)):  #遍历每个类中各个单词的概率值
+        if(p0V[i]>-6.0):topSF.append((vocabList[i],p0V[i]))#往相应元组列表中添加概率值大于阈值的单词及其概率值组成的二元列表
+        if(p1V[i]>-6.0):topNY.append((vocabList[i],p1V[i]))#往相应元组列表中添加概率值大于阈值的单词及其概率值组成的二元列表
+    #对列表按照每个二元列表中的概率值项进行排序，排序规则由大到小    
+    sortedSF=sorted(topSF,key=lambda pair:pair[1],reverse=true)#注意lambda这个单行函数规定了用于比较的是概率，而不是名称
+    print('SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**')
+    for item in sortedSF: #遍历列表中的每一个二元条目列表
+        print(item[0])    #打印每个二元列表中的单词字符串元素
+    #下面代码解释同上    
+    sortedNY=sorted(topNY,key=lambda pair:pair[1],reverse=true)
+    print('NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**')
+    for item in sortedSF:
+        print(item[0])
+#------------------------------------------------------------小总结---------------------------------------------------------------       
+#尽管朴素贝叶斯的条件独立性假设存在一定的问题，但是朴素贝叶斯算法仍然能取得比较理想的分类预测结果。    
+#此外，朴素贝叶斯在数据较少的情况下仍然适用，虽然例子中为两类类别的分析，但是朴素贝叶斯可以处理多分类的情况。
+#朴素贝叶斯的一个不足的地方是，对输入的数据有一定的要求，需要花费一定的时间进行数据的处理和解析。朴素贝叶斯中用来计算的数据为标称型数据，我们需要将字符串特征转化为相应的离散值，用于后续的统计和计算。
+    
         
     
-    
-    
-    
-    
-    
-    
-      
-     
      
