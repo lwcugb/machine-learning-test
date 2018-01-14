@@ -139,9 +139,50 @@ def bagOfWords2VecMN(vocabList,inputSet):
             returnVec[vocabList.index(word)]+=1  #某词每出现一次，次数加1
      return returnVec
     
+ 
+#----------------------------------------------------------实例1过滤垃圾邮件-----------------------------------------------------
+#处理数据长字符串
+#1 用正则表达式对长字符串进行分割，分隔符为除单词和数字之外的任意符号串
+#2 将分割后的字符串中所有的大些字母变成小写lower(),并且只保留单词长度大于3的单词  
+def testParse(bigString):
+    import re
+    listOfTokens=re.split(r'\W*',bigString)
+    return [tok.lower() for tok in listOPosts if len(tok)>2]
+def spamTest():
+    docList=[];classList=[];fullTest=[]  #新建三个列表
+    for i in range(1,26): #因为TXT的个数有25个
+        wordList=testParse(open('email/spam/%d.txt' %i).read())#打开并读取指定目录下的本文中的长字符串，并进行处理返回
+        docList.append(wordList)#将得到的字符串列表添加到docList
+        fullTest.extend(wordList)#将字符串列表中的元素添加到fullTest
+        classList.append(1)#类列表添加标签1
+        wordList=testParse(open('email/ham/&d.txt' %i).read()) #打开并取得另外一个类别为0的文件，然后进行处理
+        wordList=testParse(open('email/ham/&d.txt' %i).read())
+        docList.append(wordList)
+        fullTest.extend(wordList)
+        classList.append(0)
+    vocabList=createVocabList(docList)#将所有邮件中出现的字符串构建成字符串列表
+    #下面的代码和书上稍有不同，因为在3.x版本，range(50)对象无法进行删除操作，所以采用别的方法构造列表
+    trainingSet=[x for x in range(50)];testSet=[]#构建一个大小为50的整数列表和一个空列表
+    for i in range(10):#随机选取0~49中的10个数，作为索引，构建测试集
+        randIndex=int(random.uniform(0,len(trainingSet)))#随机选取0~49中的一个整型数
+        testSet.append(trainingSet[randIndex])#将选出的数的列表索引值添加到testSet列表中
+        del(trainingSet[randIndex])#从整数列表中删除选出的数，防止下次再次选出。同时将剩下的作为训练集
     
+    trainMat=[];trainClasses=[]#新建两个列表，分别存放训练矩阵和类标签向量
+    for docIndex in trainingSet:#遍历训练集中的每个字符串列表
+        trainMat.append(setOfWords2Vec(vocabList,docList[docIndex]))#将字符串列表转为词条向量，然后添加到训练矩阵中。书中有错误，应该把fullTest换成docList
+        trainClasses.append(classList[docIndex])#将该邮件的类标签存入训练类标签列表中
     
-    
+    p0V,p1V,pSpam=trainNB0(array(trainMat),array(trainClasses))#计算贝叶斯函数需要的概率值并返回
+    errorCount=0
+    for docIndex in testSet:#遍历测试集中的字符串列表
+        wordVector=setOfWords2Vec(vocabList,docList[docIndex])#同样将测试集中的字符串列表转为词条向量
+        if classifyNB(array(wordVector),p0V,p1V,pSpam)!=classList[docIndex]：#对测试集中字符串向量进行预测分类，分类结果不等于实际结果
+            errorCount+=1
+        print('the error rate is:',float(errorCount)/len(testSet))
+        
+
+        
     
     
     
