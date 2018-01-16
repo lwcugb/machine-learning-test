@@ -1,0 +1,83 @@
+#引言
+'''
+假设我们现有一些数据点，我们用一条直线对这些点进行拟合，这个拟合的过程就称作回归。
+利用logistic回归进行分类的主要思想是：根据现有数据对分类边界线建立回归公式，以此进行分类。
+我们知道，logistic回归主要是进行二分类预测，也即是对于0~1之间的概率值，当概率大于0.5预测为1，小于0.5预测为0.
+显然，我们不能不提到一个函数，即sigmoid=1/(1+exp(-inX)),该函数的曲线类似于一个s型，在x=0处，函数值为0.5.
+
+#基于最优化方法的最佳回归系数确定
+sigmoid函数的输入记为z，即z=w0x0+w1x1+w2x2+...+wnxn，如果用向量表示即为z=wTx，它表示将这两个数值向量对应元素相乘然后累加起来。
+其中，向量x是分类器的输入数据，w即为我们要拟合的最佳参数，从而使分类器预测更加准确。也就是说，logistic回归最重要的是要找到最佳的拟合参数。
+
+#梯度上升法
+梯度上升法(等同于我们熟知的梯度下降法，前者是寻找最大值，后者寻找最小值)，它的基本思想是：要找到某函数的最大值，最好的方法就是沿着该函数的梯度方向搜寻。
+如果函数为f，梯度记为D，a为步长，那么梯度上升法的迭代公式为：w：w+a*Dwf(w)。该公式停止的条件是迭代次数达到某个指定值或者算法达到某个允许的误差范围。
+我们熟知的梯度下降法迭代公式为：w：w-a*Dwf(w)
+
+#对于理论的解释还可以参照该篇博客：http://blog.csdn.net/lu597203933/article/details/38468303
+'''
+#以下代码保存为LogRegres.py
+#-------------------------------------------------------求权值向量-------------------------------------------------------------------
+from numpy import *
+#加载数据
+def loadDataSet():
+    dataMat = []; labelMat = []
+    fr = open('testSet.txt')
+    for line in fr.readlines():
+        lineArr = line.strip().split()  #对当前行去除首尾空格，并按空格进行分离
+        dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])]) #将每一行的两个特征x1，x2，加上x0=1,组成列表并添加到数据集列表中
+        labelMat.append(int(lineArr[2]))#将当前行标签添加到标签列表
+    return dataMat, labelMat
+
+#计算sigmoid函数
+def sigmoid(inX):
+    return 1.0/(1+exp(-inX))
+
+#梯度上升算法-计算回归系数
+def gradAscent(dataMatIn, classLabels):
+    dataMatrix = mat(dataMatIn)          #转换为numpy数据类型
+    labelMat = mat(classLabels).transpose() #将数据集标签列表转为Numpy矩阵，并转置 
+    m,n = shape(dataMatrix)
+    alpha = 0.001  #学习步长
+    maxCycles = 500 #最大迭代次数
+    weights = ones((n,1)) #初始化权值参数向量每个维度均为1.0
+    for k in range(maxCycles):
+        h = sigmoid(dataMatrix*weights)  #求当前的sigmoid函数预测概率
+        error = (labelMat - h) #此处计算真实类别和预测类别的差值
+        weights = weights + alpha * dataMatrix.transpose() * error  #更新权值参数，此处的代码来源可以参照上面的博客
+    return weights
+
+#-----------------------------------------------------------画出决策边界----------------------------------------------------------
+
+def plotBestFit(wei):
+    import matplotlib.pyplot as plt
+    weights = wei.getA()
+    dataMat, labelMat = loadDataSet()
+    dataArr = array(dataMat)
+    n = shape(dataArr)[0]
+    xcord1 = []; ycord1 = []
+    xcord2 = []; ycord2 = []
+    for i in range(n):
+        if int(labelMat[i]) == 1:
+            xcord1.append(dataArr[i,1]); ycord1.append(dataArr[i,2])
+        else: xcord2.append(dataArr[i,1]); ycord2.append(dataArr[i,2])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(xcord1, ycord1, s = 30, c = 'red', marker='s')
+    ax.scatter(xcord2, ycord2, s = 30, c = 'green')
+    x = arange(-3.0, 3.0, 0.1)
+    y = (-weights[0]- weights[1]*x)/weights[2] #设置 sigmoid函数为0。因为0是两个分类(类别1和类别0) 的分界 。
+                                               # 因此，我们设定0 = w0*x0+W1*x1+w2*x2, 然后解出x2和x1的关系(即分隔线的方程，注意x0=1)。
+    ax.plot(x, y)
+    plt.xlabel('X1');
+    plt.ylabel('X2');
+    plt.show()
+
+
+
+
+
+
+
+
+
