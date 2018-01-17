@@ -108,9 +108,12 @@ def stocGradAscent1(dataMatrix,classLabels,numIter=150):   #@dataMatrix：数据
                 weights=weights+alpha*error*dataMat[randomIndex]  #计算权值更新
                 del(dataIndex[randomIndex])  #选取该样本后，将该样本下标删除，确保每次迭代时只使用一次
     return weights
-       
-                       
 
+#上述代码中有两处改进的地方：
+#1、alpha在每次迭代更新是都会调整，这会缓解数据波动或者高频运动。此外，alpha还有一个常数项，目的是为了保证在多次迭代后仍然对新数据具有一定的影响，
+#如果要处理的问题是动态变化的，可以适当加大该常数项，从而确保新的值获得更大的回归系数。
+#2、第二个改进的地方是选择随机的样本对参数进行更新，由于增加了随机性，这就防止参数值发生周期性的波动。
+#3、并且采用上述改进算法后，收敛速度更快
 
 
 
