@@ -73,6 +73,85 @@ def plotBestFit(wei):
     plt.ylabel('X2');
     plt.show()
 
+#---------------------------------------------------------------随机梯度上升法----------------------------------------------------
+#我们知道梯度上升法每次更新回归系数都需要遍历整个数据集，当样本数量较小时该方法尚可。但是当样本数据集非常大且特征非常多时，那么该方法的计算复杂度就会特别高。
+#一种改进的方法是一次仅用一个样本点来更新回归系数，即岁集梯度上升法。由于可以在新样本到来时对分类器进行增量式更新，因此随机梯度上升法是一个在线学习算法。
+#梯度上升算法
+def stocGradAscent(dataMatrix,classLabels):
+    m,n=shape(dataMatrix)  #获取数据集的行数和列数
+    weights=ones(n)        #初始化权值向量各个参数为1.0，由ones构造的weight就是一个数组，只不过是单行的数组
+    alpha=0.01#设置步长为0.01
+    
+    #循环m次，每次选取数据集一个样本更新参数
+    for i in range(m):
+        h=sigmoid(sum(dataMatrix[i]*weights)) #计算当前样本的sigmoid函数值,两个数组相乘是元素分别相乘，并不是向量相乘，所以要用到sum()
+        error=(classLabels[i]-h) #计算当前样本的残差(代替梯度)
+        weights=weights+alpha*error*dataMatrix[i]#更新权值参数
+    return weights
+    
+#与梯度上升法的代码相比，上面随机梯度上升法代码有两处区别：一、前者的变量h和误差error都是向量，而后者是数值；二、后者没有矩阵的转换过程，变量的类型都是numpy数组
+#但是该算法收敛速度慢，而且在某些点还出现波动现象，需要进一步改进
+
+#--------------------------------------------------------改进的随机梯度上升法----------------------------------------------------------
+def stocGradAscent1(dataMatrix,classLabels,numIter=150):   #@dataMatrix：数据集列表，@classLabels：标签列表，@numIter：迭代次数，默认150
+    dataMat=array(dataMatrix)  #将数据集列表转为Numpy数组
+    m,n=shape(dataMat)         #获取数据集的行数和列数
+    weights=ones(n)            #初始化权值参数向量每个维度均为1
+    
+    for j in range(numIter):   #循环每次迭代次数
+        dataIndex=range(m)     #获取数据集行下标列表
+            for i in range(m):
+                alpha=4/(1.0+j+i)+0.1  #每次更新参数时设置动态的步长，且为保证多次迭代后对新数据仍然具有一定影响添加了固定步长0.1。随着i的循环，alpha逐渐减小
+                randomIndex=int(random.nuiform(0,len(dataIndex))) #随机获取样本
+                h=sigmoid(sum(dataMat[randomIndex]*weights))  #计算当前sigmoid函数值
+                error=classLabels-h
+                weights=weights+alpha*error*dataMat[randomIndex]  #计算权值更新
+                del(dataIndex[randomIndex])  #选取该样本后，将该样本下标删除，确保每次迭代时只使用一次
+    return weights
+       
+                       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
